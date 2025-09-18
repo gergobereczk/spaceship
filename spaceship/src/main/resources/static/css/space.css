@@ -1,0 +1,181 @@
+body {
+      background-color: coral;
+    }
+
+    /* közös konténer a státuszbárnak és a displaynek */
+    #gameArea {
+      width: 50%;
+      margin: 10px auto;
+    }
+
+    /* státuszbár */
+    #statusBar {
+      background-color: red;
+      color: #2c2c2c;
+      font-family: "Comic Sans MS", "Fredoka", sans-serif;
+      font-size: 18px;
+      padding: 12px 20px;
+      border: 3px solid #ff6f61;
+      border-radius: 12px 12px 0 0; /* csak felül kerekített */
+      box-shadow: 2px 2px 8px rgba(0,0,0,0.2);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 70%; /* kitölti a konténert */
+      box-sizing: border-box;
+      margin: 0 auto;;
+    }
+
+    /* játék kijelző */
+    #display {
+      display: flex;
+      position: relative;
+      justify-content: flex-end;
+      align-items: center;  
+      padding-top: 60px;
+      padding-left: 15px;
+      padding-right: 15px;
+      border: 5px outset red;
+      background-color: black;
+      height: 400px;
+      width: 70%; /* konténer szélességét veszi át */
+      overflow: hidden;
+      margin: 0 auto; /* középre igazítást a konténer kezeli */
+      flex-direction: column;  
+      border-radius: 0 0 12px 12px; /* csak alul kerekített */
+      box-sizing: border-box;
+    }
+
+    #spaceship {
+      position: absolute;    
+    }
+
+    #laser{
+      position: absolute;
+    }
+
+    #game {
+      text-align: center;
+    }
+
+   #gameOverWrapper {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 9999;
+}
+
+#gameOver {
+  font-size: clamp(48px, 12vw, 140px);
+  font-family: "Comic Sans MS", "Fredoka", sans-serif;
+  font-weight: 900;
+  color: #ffdddd;
+  text-shadow: 0 2px 0 #2c2c2c, 0 8px 24px rgba(255,80,60,0.30);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.08); }
+  100% { transform: scale(1); }
+}
+
+
+/* Modal háttér */
+#nicknameModal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.25); /* enyhe árnyékolás */
+  display: none; /* alapból rejtve */
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+/* Belső tartalom */
+#nicknameModal .modal-content {
+  background: #222;
+  border: 6px solid #ff0000;
+  border-radius: 0;
+  padding: 24px;
+  width: clamp(260px, 40%, 400px);
+  text-align: center;
+  color: #fff;
+  font-family: monospace, "Comic Sans MS", sans-serif;
+  box-shadow: 8px 8px 0px #000;
+}
+
+/* Címsor */
+#nicknameModal h2 {
+  margin-bottom: 20px;
+  font-size: 20px;
+  color: yellow;
+  text-shadow: 2px 2px #000;
+  letter-spacing: 2px;
+}
+
+/* Input – egyszerű, fekete szöveg */
+#nicknameInput {
+  width: 80%;
+  padding: 10px;
+  font-size: 16px;
+  border: 4px solid #ff0000;
+  border-radius: 0;
+  background: #000;
+  color: yellow; /* a szöveg fekete */
+  text-align: center;
+  margin-bottom: 20px;
+  font-family: monospace;
+}
+
+/* Gombok */
+.modal-buttons {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.modal-buttons button {
+  flex: 1;
+  padding: 12px 8px;
+  font-size: 14px;
+  border: 4px solid #ff0000;
+  border-radius: 0;
+  background: #111;
+  color: yellow;
+  font-family: monospace;
+  cursor: pointer;
+  box-shadow: 4px 4px 0px #000;
+}
+
+.modal-buttons button:hover {
+  background: #222;
+}
+
+.modal-buttons button:active {
+  background: #000;
+}
+
+/* Scrollozható rész a modalban */
+#modalInnerContent {
+    max-height: 400px; /* maximum magasság */
+    overflow-y: auto;  /* csak függőleges scroll */
+    padding-right: 10px; /* hogy a scrollbar ne takarja a tartalmat */
+}
+
+/* Optional: szebb scroll */
+#modalInnerContent::-webkit-scrollbar {
+    width: 8px;
+}
+
+#modalInnerContent::-webkit-scrollbar-track {
+    background: #333;
+    border-radius: 4px;
+}
+
+#modalInnerContent::-webkit-scrollbar-thumb {
+    background-color: red;
+    border-radius: 4px;
+}
+

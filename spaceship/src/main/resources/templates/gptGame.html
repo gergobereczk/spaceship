@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Aszteroidás játék</title>
+  <style>
+    :root {
+      --game-w: 900px;
+      --game-h: 600px;
+      --bg: #0b1020;
+      --panel: #151b2d;
+      --text: #e8ecff;
+      --accent: #36d1ff;
+      --danger: #ff5d6c;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: radial-gradient(1200px 800px at 30% 20%, #0f1730, #070a14 60%, #000);
+      color: var(--text);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      display: grid; place-content: center; min-height: 100dvh;
+    }
+
+    .wrap {
+      width: calc(var(--game-w) + 24px);
+    }
+
+    header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin: 12px auto 8px;
+      background: color-mix(in lab, var(--panel) 85%, transparent);
+      padding: 10px 14px; border-radius: 14px; border: 1px solid #1f2742;
+      box-shadow: 0 8px 24px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.04);
+    }
+    header .stat { display: flex; gap: 18px; align-items: center; flex-wrap: wrap; }
+    header .pill { padding: 6px 10px; border-radius: 999px; background: #0e1530; border: 1px solid #263159; font-weight: 600; }
+    header .pill.accent { border-color: #2a86a1; }
+    header .pill.danger { border-color: #7d2b35; }
+
+    #game {
+      position: relative;
+      width: var(--game-w);
+      height: var(--game-h);
+      background: repeating-radial-gradient(circle at 70% 20%, rgba(255,255,255,0.05) 0 2px, transparent 2px 8px),
+                  radial-gradient(800px 600px at 50% 50%, #0a0f22, #070a14 60%, #04060d);
+      overflow: hidden;
+      border-radius: 16px;
+      border: 1px solid #1f2742;
+      box-shadow: 0 20px 60px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.04);
+    }
+
+    #display {
+      position: absolute; inset: 0; /* játék színpad */
+    }
+
+    /* Űrhajó */
+    #spaceship { position: absolute; width: 72px; height: auto; user-select: none; pointer-events: none; }
+
+    /* Aszteroida (példányok osztállyal fognak menni) */
+    #asteroid, .asteroid { position: absolute; width: 56px; height: 56px; border-radius: 50%; background: #6b7aa1; box-shadow: inset -6px -10px 18px rgba(0,0,0,.35), inset 6px 6px 14px rgba(255,255,255,.08); border: 1px solid #40507a; }
+
+    /* Lézer (példányok osztállyal fognak menni) */
+    #laser, .laser { position: absolute; width: 4px; height: 18px; background: var(--accent); box-shadow: 0 0 10px var(--accent), 0 0 22px #9ff2ff; border-radius: 2px; }
+
+    /* HUD üzenetek */
+    .center-banner {
+      position: absolute; inset: 0; display: grid; place-content: center; text-align: center; pointer-events: none;
+    }
+    .center-banner .card {
+      pointer-events: auto;
+      background: color-mix(in lab, var(--panel) 85%, transparent);
+      border: 1px solid #1f2742; border-radius: 16px; padding: 22px 26px; box-shadow: 0 12px 38px rgba(0,0,0,.4);
+      backdrop-filter: blur(6px);
+    }
+    .btn {
+      display: inline-block; margin-top: 10px; padding: 10px 14px; border-radius: 12px; font-weight: 700; letter-spacing: .2px; cursor: pointer; user-select: none;
+      background: linear-gradient(180deg, #42d6ff, #1aa6d1); border: none; color: #00293a; box-shadow: 0 8px 20px rgba(66,214,255,.35);
+    }
+    .btn:active { transform: translateY(1px); }
+
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="stat">
+        <div class="pill accent">Pont: <span id="score">0</span></div>
+        <div class="pill">Sebesség: <span id="speed">5</span></div>
+        <div class="pill">Aszteroidák: <span id="asteroidCount">0</span></div>
+        <div class="pill danger">Életek: <span id="lives">3</span></div>
+      </div>
+      <div class="pill">Nyilak = mozgatás • Space = lövés</div>
+    </header>
+
+    <div id="game">
+      <div id="display">
+        <!-- űrhajó: állítsd be a képed elérését -->
+        <img id="spaceship" src="images/spaceship_adobe.png" alt="spaceship" />
+      </div>
+
+      <!-- Középső overlay -->
+      <div id="overlay" class="center-banner">
+        <div class="card">
+          <h2>Aszteroidák jönnek!</h2>
+          <p>Nyomd meg az <strong>Enter</strong> gombot vagy kattints Start-ra.</p>
+          <button id="startBtn" class="btn">Start</button>
+        </div>
+      </div>
+
+      <!-- Sablon elemek (kérése szerint: id="asteroid" és id="laser"). Ezeket klónozzuk. -->
+      <div id="templates" class="hidden">
+        <div id="asteroid"></div>
+        <div id="laser"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // --- Alap változók
+    const game = document.getElementById('game');
+    const stage = document.getElementById('display');
+    const ship = document.getElementById('spaceship');
+    const scoreEl = document.getElementById('score');
+    const livesEl = document.getElementById('lives');
+    const speedEl = document.getElementById('speed');
+    const asteroidCountEl = document.getElementById('asteroidCount');
+    const overlay = document.getElementById('overlay');
+    const startBtn = document.getElementById('startBtn');
+
+    const tplAsteroid = document.getElementById('asteroid');
+    const tplLaser = document.getElementById('laser');
+
+    const GAME_W = game.clientWidth;
+    const GAME_H = game.clientHeight;
+
+    // --- Játékállapot
+    let state;
+
+    const resetState = () => ({
+      running: false,
+      x: Math.round(GAME_W * 0.1),
+      y: Math.round(GAME_H * 0.5),
+      speed: 5,
+      maxSpeed: 14,
+      accEvery: 12_000, // ms-enként gyorsul kicsit
+      lastAcc: 0,
+      score: 0,
+      lives: 3,
+      moving: { up: false, down: false, left: false, right: false },
+      lasers: [], // {el, x, y, vy}
+      asteroids: [], // {el, x, y, vx, vy, r}
+      lastSpawn: 0,
+      spawnEvery: 1100, // ms
+      lastShot: 0,
+      shotCooldown: 180, // ms
+      raf: null,
+      startedAt: 0,
+    });
+
+    // --- Segédek
+    function clamp(v, a, b){ return Math.max(a, Math.min(b, v)); }
+
+    function rectsIntersect(a, b){
+      return !(a.right < b.left || a.left > b.right || a.bottom < b.top || a.top > b.bottom);
+    }
+
+    function getRect(el){ return el.getBoundingClientRect(); }
+
+    function toLocalRect(el){
+      // A boundingClientRect viewporthoz viszonyított; konvertáljuk a game-hez
+      const r = el.getBoundingClientRect();
+      const g = game.getBoundingClientRect();
+      return { left: r.left - g.left, top: r.top - g.top, right: r.right - g.left, bottom: r.bottom - g.top };
+    }
+
+    // --- Irányítás
+    function setupControls(){
+      // Ne görgessen a nyilak/space
+      window.addEventListener('keydown', (e) => {
+        if (["ArrowUp","ArrowDown","ArrowLeft","ArrowRight"," ","Space","Spacebar"].includes(e.key)) {
+          e.preventDefault();
+        }
+      }, { passive: false });
+
+      document.addEventListener('keydown', (e) => {
+        if (!state.running && (e.key === 'Enter')) { startGame(); return; }
+        switch(e.key){
+          case 'ArrowUp': state.moving.up = true; break;
+          case 'ArrowDown': state.moving.down = true; break;
+          case 'ArrowLeft': state.moving.left = true; break;
+          case 'ArrowRight': state.moving.right = true; break;
+          case ' ': // Space
+          case 'Space':
+          case 'Spacebar':
+            shoot();
+            break;
+        }
+      });
+
+      document.addEventListener('keyup', (e) => {
+        switch(e.key){
+          case 'ArrowUp': state.moving.up = false; break;
+          case 'ArrowDown': state.moving.down = false; break;
+          case 'ArrowLeft': state.moving.left = false; break;
+          case 'ArrowRight': state.moving.right = false; break;
+        }
+      });
+
+      startBtn.addEventListener('click', startGame);
+    }
+
+    // --- Lövés
+    function shoot(){
+      const now = performance.now();
+      if (!state.running) return;
+      if (now - state.lastShot < state.shotCooldown) return;
+      state.lastShot = now;
+
+      const laser = tplLaser.cloneNode(true);
+      laser.removeAttribute('id');
+      laser.classList.add('laser');
+      stage.appendChild(laser);
+
+      // Lézer kezdőpontja: a hajó teteje közepe
+      const shipRect = ship.getBoundingClientRect();
+      const gameRect = game.getBoundingClientRect();
+      let lx = (shipRect.left - gameRect.left) + shipRect.width/2 - 2; // 2px fele szélesség
+      let ly = (shipRect.top - gameRect.top) - 10;
+
+      laser.style.left = lx + 'px';
+      laser.style.top = ly + 'px';
+
+      state.lasers.push({ el: laser, x: lx, y: ly, vy: -14 });
+    }
+
+    // --- Aszteroida spawner
+    function spawnAsteroid(){
+      const a = tplAsteroid.cloneNode(true);
+      a.removeAttribute('id');
+      a.classList.add('asteroid');
+      stage.appendChild(a);
+
+      const r = 22 + Math.random()*26; // sugár ~22-48px
+      a.style.width = a.style.height = Math.round(r*2) + 'px';
+
+      // Kezdő pozíció: felül kívülről jön be, random X
+      const x = Math.random() * (GAME_W - r*2);
+      const y = -r*2 - 10; // kicsit feljebb
+
+      // Sebesség: lefelé + kis oldalirány
+      const base = clamp(3 + state.speed * 0.6, 3, 18);
+      const vy = base + Math.random() * 2.5;
+      const vx = (Math.random() - 0.5) * 2.2;
+
+      a.style.left = Math.round(x) + 'px';
+      a.style.top = Math.round(y) + 'px';
+
+      state.asteroids.push({ el: a, x, y, vx, vy, r });
+      asteroidCountEl.textContent = state.asteroids.length;
+    }
+
+    // --- Ütközéskezelés
+    function handleCollisions(){
+      // Lézer ↔ aszteroida
+      for (let i = state.lasers.length - 1; i >= 0; i--){
+        const L = state.lasers[i];
+        const lRect = toLocalRect(L.el);
+        for (let j = state.asteroids.length - 1; j >= 0; j--){
+          const A = state.asteroids[j];
+          const aRect = toLocalRect(A.el);
+          if (rectsIntersect(lRect, aRect)){
+            // találat
+            stage.removeChild(L.el);
+            stage.removeChild(A.el);
+            state.lasers.splice(i,1);
+            state.asteroids.splice(j,1);
+            state.score += 10;
+            scoreEl.textContent = state.score;
+            asteroidCountEl.textContent = state.asteroids.length;
+            break;
+          }
+        }
+      }
+
+      // Hajó ↔ aszteroida
+      const sRect = toLocalRect(ship);
+      for (let j = state.asteroids.length - 1; j >= 0; j--){
+        const A = state.asteroids[j];
+        const aRect = toLocalRect(A.el);
+        if (rectsIntersect(sRect, aRect)){
+          // sebződés
+          stage.removeChild(A.el);
+          state.asteroids.splice(j,1);
+          asteroidCountEl.textContent = state.asteroids.length;
+          loseLife();
+        }
+      }
+    }
+
+    function loseLife(){
+      state.lives -= 1;
+      livesEl.textContent = state.lives;
+
+      // kis vizuális feedback
+      ship.style.filter = 'brightness(1.5) drop-shadow(0 0 8px #ff9aa6)';
+      setTimeout(()=> ship.style.filter = '', 120);
+
+      if (state.lives <= 0){
+        gameOver();
+      }
+    }
+
+    function gameOver(){
+      state.running = false;
+      cancelAnimationFrame(state.raf);
+
+      // Tisztítás
+      for (const L of state.lasers){ try { stage.removeChild(L.el); } catch(e){} }
+      for (const A of state.asteroids){ try { stage.removeChild(A.el); } catch(e){} }
+      state.lasers = [];
+      state.asteroids = [];
+      asteroidCountEl.textContent = 0;
+
+      overlay.innerHTML = `
+        <div class="card">
+          <h2>Vége a játéknak</h2>
+          <p>Pontszám: <strong>${state.score}</strong></p>
+          <button id="restartBtn" class="btn">Újra</button>
+        </div>`;
+      overlay.classList.remove('hidden');
+      document.getElementById('restartBtn').addEventListener('click', startGame);
+    }
+
+    // --- Game loop
+    function loop(ts){
+      if (!state.running) return;
+
+      // Gyorsulás idővel
+      if (ts - state.lastAcc > state.accEvery){
+        state.lastAcc = ts;
+        state.speed = clamp(state.speed + 1, 1, state.maxSpeed);
+        speedEl.textContent = state.speed;
+        // spawn kicsit gyorsabban
+        state.spawnEvery = Math.max(500, state.spawnEvery - 30);
+      }
+
+      // Irányítás szerinti mozgatás
+      const v = state.speed; // pixel/frame környéke, de a monitor frissítésre ráültetjük
+      if (state.moving.up) state.y -= v;
+      if (state.moving.down) state.y += v;
+      if (state.moving.left) state.x -= v;
+      if (state.moving.right) state.x += v;
+
+      // Határok
+      const shipW = ship.clientWidth;
+      const shipH = ship.clientHeight;
+      state.x = clamp(state.x, 0, GAME_W - shipW);
+      state.y = clamp(state.y, 0, GAME_H - shipH);
+
+      ship.style.left = Math.round(state.x) + 'px';
+      ship.style.top  = Math.round(state.y) + 'px';
+
+      // Lézerek mozgatása
+      for (let i = state.lasers.length - 1; i >= 0; i--){
+        const L = state.lasers[i];
+        L.y += L.vy;
+        if (L.y < -30){
+          try { stage.removeChild(L.el); } catch(e){}
+          state.lasers.splice(i,1);
+          continue;
+        }
+        L.el.style.top = Math.round(L.y) + 'px';
+      }
+
+      // Aszteroidák mozgatása
+      for (let j = state.asteroids.length - 1; j >= 0; j--){
+        const A = state.asteroids[j];
+        A.x += A.vx;
+        A.y += A.vy;
+        if (A.y > GAME_H + 100){
+          try { stage.removeChild(A.el); } catch(e){}
+          state.asteroids.splice(j,1);
+          asteroidCountEl.textContent = state.asteroids.length;
+          continue;
+        }
+        A.el.style.left = Math.round(A.x) + 'px';
+        A.el.style.top  = Math.round(A.y) + 'px';
+      }
+
+      // Spawner
+      if (ts - state.lastSpawn > state.spawnEvery){
+        state.lastSpawn = ts;
+        spawnAsteroid();
+      }
+
+      // Ütközések
+      handleCollisions();
+
+      state.raf = requestAnimationFrame(loop);
+    }
+
+    // --- Start / Reset
+    function startGame(){
+      overlay.classList.add('hidden');
+      state = resetState();
+      scoreEl.textContent = 0;
+      livesEl.textContent = state.lives;
+      speedEl.textContent = state.speed;
+      asteroidCountEl.textContent = 0;
+
+      // űrhajó kezdő pozíció
+      ship.style.left = state.x + 'px';
+      ship.style.top  = state.y + 'px';
+
+      state.running = true;
+      state.startedAt = performance.now();
+      state.lastSpawn = state.startedAt;
+      state.lastAcc = state.startedAt;
+      state.raf = requestAnimationFrame(loop);
+    }
+
+    // Init
+    setupControls();
+  </script>
+</body>
+</html>
