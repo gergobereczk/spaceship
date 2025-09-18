@@ -1,0 +1,26 @@
+version: '3.9'
+
+services:
+  app:
+    build: .
+    container_name: springboot-app
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/spaceship
+      SPRING_DATASOURCE_USERNAME: gergo
+      SPRING_DATASOURCE_PASSWORD: your_password
+    depends_on:
+      - db
+
+  db:
+    image: postgres:15
+    container_name: postgres-db
+    environment:
+      POSTGRES_DB: spaceship
+      POSTGRES_USER: gergo
+      POSTGRES_PASSWORD: your_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./dbinit:/docker-entrypoint-initdb.d

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Spaceship Game</title>
+  <link rel="icon" type="image/png" href="images/spaceship_adobe.png" />
+
+  <link th:href="@{/css/space.css}" rel="stylesheet">
+  <script type="module" th:src="@{/js/main.js}" defer></script>
+</head>
+
+<body>
+  <div id="game">
+    <div id="statusBar">
+      <div id="life"></div>
+      <div>Spaceship</div>
+      <div id="asteroiddemage"></div>
+      <div id="laserStatus"></div>
+
+    </div>
+
+
+    <div id="display">
+
+
+
+      <img id="spaceship" src="images/spaceship_adobe.png" width="50" height="80">
+      <img id="laser" src="images/laser.png" width="10" height="30" style="display: none;">
+      <div id="gameOver" style="display: none;">GAME OVER</div>
+    </div>
+    
+    <img id="asteroid" src="images/asteroid.png" width="50" height="50" style="display: none;">
+
+  </div>
+
+
+
+  </div>
+
+
+
+  </div>
+<div id="nicknameModal">
+  <div class="modal-content">
+   
+ <h2 id ="modalHeader">Enter Nickname</h2>
+
+   
+   
+    
+    <!-- Scrollozható rész a rekordoknak -->
+    <div id="modalInnerContent">
+      <!-- Ide kerülnek a rekordok a JS-ből -->
+    
+
+    <input type="text" id="nicknameInput" placeholder="Your nickname..." />
+
+    
+    </div>
+    <div class="modal-buttons">
+      <button id="playAgainBtn" onclick="playAgain()">Play Again</button>
+      <button id="addRecordBtn" onclick="addRecords()">Add Records</button>
+    </div>
+  </div>
+</div>
+
+      </div>
+
+    </div>
+  </div>
+
+
+
+
+
+</body>
+
+</html>
