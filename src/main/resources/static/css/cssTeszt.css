@@ -1,0 +1,45 @@
+#first {
+    width: 200px;
+    border: 2px solid black;
+    margin: auto;
+     font-size: 24px;
+    color: blue;
+      
+}
+
+#second {
+        left: 50%; 
+      transform: translateX(-50%);
+      position: absolute;
+    bottom: 0; 
+      width: 200px;
+    border: 2px solid black;
+ 
+    border-color: aqua;
+     font-size: 24px;
+    color: red;
+}
+
+#third {
+    
+      width: 200px;
+    border: 2px solid black;
+    margin: auto;
+    border-color: aqua;
+     font-size: 24px;
+    color: green;
+}
+
+#boxes {
+          
+position: relative;
+    
+    width: 600px;
+    height: 400px;
+    border: 2px solid black;
+    margin: auto;
+    
+     font-size: 24px;
+    color: green;
+    
+}

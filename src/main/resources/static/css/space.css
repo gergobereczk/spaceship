@@ -36,28 +36,25 @@ body {
 /* játék kijelző */
 #display {
   display: flex;
+  flex-direction: column;
+  justify-content: center; /* függőlegesen középre */
+  align-items: center;     /* vízszintesen középre */
   position: relative;
-  justify-content: flex-end;
-  align-items: center;
-  padding-top: 60px;
-  padding-left: 15px;
-  padding-right: 15px;
-  border: 5px outset red;
-  background-color: black;
   height: 80vh;
   width: 70%;
-  /* konténer szélességét veszi át */
-  overflow: hidden;
   margin: 0 auto;
-  /* középre igazítást a konténer kezeli */
-  flex-direction: column;
-  border-radius: 0 0 12px 12px;
-  /* csak alul kerekített */
+  border: 5px outset red;
+  background-color: black;
+  padding: 0 15px;
   box-sizing: border-box;
+  border-radius: 0 0 12px 12px;
+  overflow: hidden;
 }
+
 
 #spaceship {
   position: absolute;
+    bottom: 0;
 }
 
 #laser {
@@ -70,17 +67,21 @@ body {
 
 
 #gameOverWrapper {
-  align-self: center; 
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center; /* vízszintesen középre */
+  align-items: center;     /* függőlegesen középre */
   z-index: 9999;
 }
 
 #gameOver {
     
     position: absolute;
+ 
   
   font-size: clamp(48px, 12vw, 140px);
   font-family: "Comic Sans MS", "Fredoka", sans-serif;

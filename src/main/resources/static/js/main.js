@@ -13,7 +13,7 @@ async function addRecords() {
     try {
         // 1. Olvassuk ki a két értéket a modalból
         const nickname = document.getElementById('nicknameInput').value.trim();
-        const score = game.gameLoop.status.getAsteroidStatus();
+        const score = game.gameLoop.status.getLastStatus();
 
         if (!nickname || nickname.length > 15) {
             alert('Adj meg egy nevet (1-15 karakter)!');

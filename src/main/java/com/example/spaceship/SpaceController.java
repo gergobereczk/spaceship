@@ -26,4 +26,9 @@ public class SpaceController {
         return "game";
     }
 
+    @GetMapping("/csslearn")
+    public String getCsslearn() {
+        return "csslearn";
+    }
+
 }

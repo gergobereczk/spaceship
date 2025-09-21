@@ -12,19 +12,37 @@ export default class status {
         this.asteroiddemage = document.getElementById("asteroiddemage");
 
         this.laserStatus = document.getElementById("laserStatus");
+
+        this.lastStatus;
     }
 
     
 
 
 showStatus() {
-    //alert(this.asteroids.destroyedAsteroids);
+    
+  
+    
     this.life.innerText = "Life: " + this.spaceship.life;
     this.asteroiddemage.innerText = "Asteroid left: " + this.asteroids.destroyedAsteroids;
     this.laserStatus.innerText = "Lasers: " + this.lasers.passiveLaser.length;
 }
 
 getAsteroidStatus() {
+      
+  
+  
     return this.asteroids.destroyedAsteroids;
+}
+
+saveLastStatus(){
+this.lastStatus = this.asteroids.destroyedAsteroids;
+}
+
+getLastStatus() {
+      
+  
+  
+    return this.lastStatus;
 }
 }

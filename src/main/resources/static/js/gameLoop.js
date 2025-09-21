@@ -115,6 +115,7 @@ export default class GameLoop {
         if (this.spaceship.life <= 0) {
             if (this.gameState !== "GAMEOVER") {
                 this.status.showStatus();
+                this.status.saveLastStatus();
                 this.gameState = "GAMEOVER";
                 this.gameOver.style.display = "block";
             }
