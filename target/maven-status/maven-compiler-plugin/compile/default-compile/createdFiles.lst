@@ -1,0 +1,6 @@
+com\example\spaceship\Player.class
+com\example\spaceship\SpaceController.class
+com\example\spaceship\JdbcService.class
+com\example\spaceship\SecurityConfig.class
+com\example\spaceship\SpaceshipApplication.class
+com\example\spaceship\SpaceshipRestController.class

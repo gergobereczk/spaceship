@@ -1,0 +1,35 @@
+version: '3.9'
+
+services:
+  db:
+    image: postgres:15
+    container_name: postgres-db
+    environment:
+      POSTGRES_DB: spaceship
+      POSTGRES_USER: gergo
+      POSTGRES_PASSWORD: gergo
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./dbinit:/docker-entrypoint-initdb.d
+
+  springboot-app:
+    build:
+      context: .
+      dockerfile: Dockerfile.app
+    container_name: springboot-app
+    depends_on:
+      - db
+    expose:
+      - "8080"
+
+  nginx-proxy:
+    build:
+      context: .
+      dockerfile: Dockerfile.nginx
+    container_name: nginx-proxy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - springboot-app
