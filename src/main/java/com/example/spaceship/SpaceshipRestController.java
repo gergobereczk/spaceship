@@ -20,8 +20,8 @@ public class SpaceshipRestController {
     public List<Player> getAll(@RequestParam String nickName,
         @RequestParam int score) throws SQLException {
 
-            
-        service.insertPlayer(nickName, score); // már működni fog
+           
+        service.insertPlayer(nickName, score); // 
        
         return service.getAllPlayer();
     }
